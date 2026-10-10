@@ -1,0 +1,407 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lotificación San Javier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: mesa de dibujo — controles | plano | cuadro de áreas y negocio | tabla de lotes; se apilan en pantallas chicas */
+:root{
+  --bg:#f1f0ec; --panel:#fbfaf7; --ink:#26241f; --muted:#6c675f; --line:#d6d1c7;
+  --accent:#8a7356; --accent-ink:#ffffff; --brand:#b7a187; --brand2:#acaaa8; --warn:#b5651d; --bad:#a23b2a; --good:#3f7a52;
+  --lot:#ffffff; --lot-edge:#2f2c26; --street:#cfccc6; --walk:#e4e1dc; --axisline:#8d877d; --median:#a9cc94;
+  --green:#bad8a6; --green2:#d2e6c3; --green3:#e4efd9; --access:#dedbd5; --com:#efe4cf; --com-edge:#8f7a55;
+  --ddv:#7f7a72; --grid:#aaa49a; --dim:#5f5a52;
+  --f-ui:"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#171614; --panel:#201e1b; --ink:#ebe7e0; --muted:#a39d93; --line:#3a3630;
+  --accent:#c9b293; --accent-ink:#1b1915; --brand:#c9b293; --brand2:#b9b7b5; --warn:#e0a35d; --bad:#e07a66; --good:#7cc193;
+  --lot:#27241f; --lot-edge:#ddd7cd; --street:#4a4741; --walk:#3a3732; --axisline:#8f897f; --median:#4d7449;
+  --green:#46704a; --green2:#3a5c3e; --green3:#2e4632; --access:#33302b; --com:#4d4433; --com-edge:#c9b085;
+  --ddv:#9a948a; --grid:#6e685f; --dim:#b8b1a6; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#171614; --panel:#201e1b; --ink:#ebe7e0; --muted:#a39d93; --line:#3a3630;
+  --accent:#c9b293; --accent-ink:#1b1915; --brand:#c9b293; --brand2:#b9b7b5; --warn:#e0a35d; --bad:#e07a66; --good:#7cc193;
+  --lot:#27241f; --lot-edge:#ddd7cd; --street:#4a4741; --walk:#3a3732; --axisline:#8f897f; --median:#4d7449;
+  --green:#46704a; --green2:#3a5c3e; --green3:#2e4632; --access:#33302b; --com:#4d4433; --com-edge:#c9b085;
+  --ddv:#9a948a; --grid:#6e685f; --dim:#b8b1a6; color-scheme:dark }
+html,body{background:var(--bg);color:var(--ink);font-family:var(--f-ui)}
+.wrap{padding-inline:16px;padding-block:14px 28px;max-width:1800px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;border-bottom:1px solid var(--line);padding-bottom:10px}
+header svg.logo{height:30px;width:auto;flex:none}
+header .tt{display:flex;flex-direction:column;gap:2px;min-width:0}
+h1{font-size:1.45rem;font-weight:700;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted);font-size:.9rem}
+.grid{display:grid;grid-template-columns:270px minmax(0,1fr) 330px 300px;gap:12px;align-items:start}
+@media (max-width:1550px){.grid{grid-template-columns:270px minmax(0,1fr) 330px}.lotes{grid-column:3;}}
+@media (max-width:1150px){.grid{grid-template-columns:260px minmax(0,1fr)}.right,.lotes{grid-column:auto}}
+@media (max-width:720px){.grid{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;min-width:0}
+.panel h2{font-size:.76rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.controls{display:flex;flex-direction:column;gap:12px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg button{font:600 .95rem var(--f-ui);padding:8px 0;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ctl{display:grid;grid-template-columns:minmax(0,1fr) 78px;gap:2px 8px;align-items:center}
+.ctl label{grid-column:1 / -1;font-size:.86rem;display:flex;justify-content:space-between;gap:6px}
+.ctl label small{color:var(--muted);font-size:.74rem}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl input[type=number],.money input{width:100%;font:500 .82rem var(--f-num);padding:3px 5px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);text-align:right}
+.ctl.dis{opacity:.45}
+.street{border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.street b{font-size:.85rem}
+.toggles{display:flex;flex-direction:column;gap:4px;font-size:.86rem}
+.hint{font-size:.78rem;color:var(--muted);line-height:1.35;margin:0}
+.planpanel{padding:6px}
+svg#plan{width:100%;height:auto;display:block;max-height:88vh;touch-action:none}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+td,th{padding:3px 2px;border-bottom:1px solid var(--line);vertical-align:baseline}
+th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding-top:9px}
+td.n,th.n{text-align:right;font-family:var(--f-num);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.78rem}
+tr.sub td{font-weight:700;border-bottom:1.5px solid var(--ink)}
+tr.tot td{font-weight:700;font-size:.9rem}
+tr.bad td{color:var(--bad)}
+tr.fix td{color:var(--muted)}
+.tag{font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;border-radius:3px;padding:1px 4px;margin-left:4px;vertical-align:1px}
+.tag.fijo{border:1px solid var(--line);color:var(--muted)}
+.tag.var{background:var(--accent);color:var(--accent-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:.78rem}
+.chip.ok{border-color:var(--good);color:var(--good)}
+.chip.warn{border-color:var(--warn);color:var(--warn)}
+.chip.bad{border-color:var(--bad);color:var(--bad)}
+ul.avisos{margin:8px 0 0;padding-left:18px;font-size:.8rem;color:var(--warn)}
+.btn{font:600 .84rem var(--f-ui);border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:5px;padding:6px 10px;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.76rem;color:var(--muted);padding:6px 6px 2px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:14px;height:10px;border:1px solid var(--lot-edge);display:inline-block}
+.money{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:6px 8px;align-items:center;font-size:.84rem}
+.kpi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;margin-top:10px;font-size:.86rem}
+.kpi .v{font-family:var(--f-num);font-variant-numeric:tabular-nums;text-align:right}
+.kpi .big{font-weight:700;font-size:1rem}
+.scroll{max-height:70vh;overflow:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <svg class="logo" viewBox="0 0 454.19 70.97" role="img" aria-label="tramora"><path fill="var(--brand)" d="M0,0H23.07a87.86,87.86,0,0,0,0,71H0Z"/><path fill="var(--brand)" d="M36.72,0H73.84V71H36.72A75.57,75.57,0,0,1,36.72,0Z"/><path fill="var(--brand2)" d="M99.25,0h10V14.34h17.08v10H109.28V43.8a11.3,11.3,0,0,0,11.3,11.3H131.2v10H120.58A21.33,21.33,0,0,1,99.25,43.8Z"/><path fill="var(--brand2)" d="M137.23,65.12V35a21.33,21.33,0,0,1,21.33-21.33h9.26v10h-9.26A11.3,11.3,0,0,0,147.26,35V65.12Z"/><path fill="var(--brand2)" d="M211.67,14.34h10V65.12h-10V59.49a26.51,26.51,0,1,1,0-39.52Zm-1.19,25.39A16.49,16.49,0,1,0,194,56.22,16.48,16.48,0,0,0,210.48,39.730Z"/><path fill="var(--brand2)" d="M229.43,65.12V35a21.33,21.33,0,0,1,37.64-13.73A21.33,21.33,0,0,1,304.72,35V65.12h-10V35a11.3,11.3,0,1,0-22.6,0V65.12h-10V35a11.3,11.3,0,0,0-22.6,0V65.12Z"/><path fill="var(--brand2)" d="M337.3,66.25a26.52,26.52,0,1,1,26.51-26.52A26.52,26.52,0,0,1,337.3,66.25Zm16.48-26.52A16.49,16.49,0,1,0,337.3,56.22,16.48,16.48,0,0,0,353.78,39.73Z"/><path fill="var(--brand2)" d="M369.65,65.12V35A21.33,21.33,0,0,1,391,13.71h9.26v10H391A11.3,11.3,0,0,0,379.68,35V65.12Z"/><path fill="var(--brand2)" d="M444.16,14.34h10V65.12h-10V59.49a26.51,26.51,0,1,1,0-39.52ZM443,39.73a16.49,16.49,0,1,0-16.49,16.49A16.48,16.48,0,0,0,443,39.73Z"/></svg>
+    <div class="tt"><h1>Lotificación San Javier</h1>
+    <p>Reserva San Javier · Irapuato, Gto. · terreno neto sin derecho de vía · metros y m²</p></div>
+  </header>
+  <div class="grid">
+    <aside class="panel controls" aria-label="Controles">
+      <div>
+        <h2>Calles</h2>
+        <div class="seg" role="group" aria-label="Número de calles">
+          <button data-n="1" aria-pressed="true">1 calle</button>
+          <button data-n="2" aria-pressed="false">2 calles</button>
+          <button data-n="3" aria-pressed="false">3 calles</button>
+        </div>
+      </div>
+      <div id="streetCtl" class="controls"></div>
+      <p class="hint">Arrastra el punto de cada calle sobre el eje 14 para moverla. Calle: 9 m de arroyo y 2 m de banqueta por lado, más el camellón.</p>
+      <div>
+        <h2>Lotes</h2>
+        <div class="controls" id="mainCtl"></div>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="t_ejes" checked> Ejes de lotes</label>
+        <label><input type="checkbox" id="t_areas" checked> Áreas en los lotes</label>
+        <label><input type="checkbox" id="t_cotas" checked> Cotas del terreno</label>
+      </div>
+      <button class="btn" id="reset">Volver a la lotificación base</button>
+    </aside>
+
+    <main class="panel planpanel">
+      <svg id="plan" viewBox="-30 -176 182 344" role="img" aria-label="Plano de lotificación">
+        <defs><pattern id="hatch" width="2.2" height="2.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="2.2" stroke="var(--ddv)" stroke-width="0.18"/></pattern></defs>
+        <g id="g"></g>
+      </svg>
+      <div class="legend">
+        <span><i style="background:var(--lot)"></i>Lote vendible</span>
+        <span><i style="background:var(--com);border-color:var(--com-edge)"></i>Comercial (fijo)</span>
+        <span><i style="background:var(--street)"></i>Vialidad</span>
+        <span><i style="background:var(--median)"></i>Camellón</span>
+        <span><i style="background:var(--green)"></i>Área verde</span>
+        <span><i style="background:var(--green2)"></i>Corredor verde</span>
+        <span><i style="background:var(--access)"></i>Acceso (fijo)</span>
+        <span><i style="background:url('#');background:repeating-linear-gradient(45deg,var(--access) 0 3px,var(--ddv) 3px 4px)"></i>Derecho de vía</span>
+      </div>
+    </main>
+
+    <div class="col right">
+      <section class="panel" aria-label="Cuadro de áreas">
+        <h2>Cuadro de áreas</h2>
+        <div class="chips" id="chips"></div>
+        <div style="overflow-x:auto"><table id="tabla"></table></div>
+        <ul class="avisos" id="avisos"></ul>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn" id="copiar">Copiar tablas</button><span id="copiado" class="hint"></span>
+        </div>
+      </section>
+      <section class="panel" aria-label="Números del negocio">
+        <h2>Números del negocio</h2>
+        <div class="money">
+          <label for="p_hab">Precio venta lote ($/m²)</label><input type="number" id="p_hab" min="0" step="50" value="4500">
+          <label for="p_com">Precio venta comercial ($/m²)</label><input type="number" id="p_com" min="0" step="50" value="6500">
+          <label for="c_ter">Costo del terreno en breña ($)</label><input type="number" id="c_ter" min="0" step="10000" value="0">
+          <label for="c_inv">Inversión en urbanización ($)</label><input type="number" id="c_inv" min="0" step="10000" value="0">
+        </div>
+        <p class="hint" style="margin-top:6px">Los precios vienen de ejemplo: escribe los tuyos.</p>
+        <div class="kpi" id="kpi"></div>
+      </section>
+    </div>
+
+    <section class="panel lotes" aria-label="Tabla de lotes">
+      <h2>Tabla de lotes</h2>
+      <div class="scroll"><table id="tlotes"></table></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+// ---------- datos fijos (Rhino: SAN JAVIER_BASE.3dm, metros) ----------
+const NW=[11.229,154.996], NE=[118.479,144.661], SE=[121.762,-117.741], SW=[11.228,-132.842];
+const DDV=[SW,SE,[121.939,-131.855],[11.229,-143.585]];   // eje 17 -> eje 18
+const Y14=-95.101, EJE23=66.229, BANQ=2, ARROYO=9, LMIN=600, LMAX=990;
+const COM_W=[[11.429,-125.492],[16.231,-124.786],[16.234,-124.801],[43.008,-120.947],[43.667,-120.714],[44.142,-120.531],[44.613,-120.336],[45.101,-120.119],[45.539,-119.912],[45.994,-119.683],[46.443,-119.443],[46.886,-119.193],[47.323,-118.931],[47.753,-118.659],[48.203,-118.358],[48.593,-118.083],[49.002,-117.78],[49.404,-117.467],[49.798,-117.144],[50.183,-116.812],[50.561,-116.47],[50.93,-116.119],[51.29,-115.759],[51.642,-115.391],[51.984,-115.014],[52.317,-114.629],[52.64,-114.235],[52.954,-113.834],[53.258,-113.426],[53.551,-113.01],[53.834,-112.586],[54.107,-112.157],[54.37,-111.72],[54.621,-111.277],[54.873,-110.807],[55.091,-110.374],[55.309,-109.914],[55.516,-109.449],[55.742,-108.902],[55.896,-108.504],[56.068,-108.025],[56.263,-107.432],[56.377,-107.054],[56.513,-106.564],[56.638,-106.07],[56.75,-105.573],[56.85,-105.074],[56.904,-104.787],[57.24,-104.787],[57.395,-104.172],[57.548,-103.53],[57.706,-102.822],[57.863,-102.058],[58.007,-101.293],[58.14,-100.524],[58.259,-99.754],[58.367,-98.982],[58.462,-98.209],[58.547,-97.404],[58.615,-96.644],[58.677,-95.765],[58.71,-95.201],[11.421,-95.201],[11.429,-125.442]];
+const COM_E=[[89.687,-115.0],[101.951,-113.315],[101.937,-113.216],[108.588,-112.303],[108.601,-112.402],[116.069,-111.376],[116.055,-111.277],[121.465,-110.534],[121.274,-95.201],[73.778,-95.201],[73.836,-95.798],[73.916,-96.493],[74.009,-97.186],[74.115,-97.878],[74.233,-98.567],[74.364,-99.255],[74.507,-99.939],[74.663,-100.622],[74.831,-101.301],[75.012,-101.977],[75.204,-102.649],[75.265,-102.856],[75.444,-102.811],[75.595,-103.359],[75.741,-103.834],[75.932,-104.386],[76.08,-104.775],[76.153,-104.961],[76.363,-105.448],[76.618,-105.987],[76.785,-106.315],[76.94,-106.608],[77.206,-107.072],[77.459,-107.484],[77.761,-107.941],[77.94,-108.2],[78.306,-108.691],[78.498,-108.937],[78.794,-109.295],[79.14,-109.687],[79.491,-110.061],[79.847,-110.418],[80.048,-110.609],[80.382,-110.914],[80.725,-111.208],[81.075,-111.493],[81.432,-111.767],[81.796,-112.03],[82.259,-112.343],[82.544,-112.526],[82.927,-112.757],[83.322,-112.981],[83.737,-113.2],[84.178,-113.416],[84.58,-113.599],[85.008,-113.78],[85.441,-113.948],[85.878,-114.103],[86.318,-114.246],[86.761,-114.375],[87.207,-114.492],[87.656,-114.595],[88.107,-114.686],[88.559,-114.764],[89.079,-114.837],[89.245,-114.858],[89.695,-114.902]];
+const DEF={1:[66.229],2:[45,88],3:[36,66.2,96]};
+const BASE={lotes:20,frente:20,despl:0,jardin:15,corredor:0,camellon:0,espalda:0};
+
+// ---------- geometria ----------
+const lerpX=(a,b,y)=>a[0]+(b[0]-a[0])*(y-a[1])/(b[1]-a[1]);
+const lerpY=(a,b,x)=>a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0]);
+const xW=y=>lerpX(SW,NW,y), xE=y=>lerpX(SE,NE,y);
+const TER=[SW,SE,NE,NW];
+function area(p){if(!p||p.length<3)return 0;let s=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];s+=a[0]*b[1]-b[0]*a[1]}return Math.abs(s)/2}
+function centroid(p){let A=0,cx=0,cy=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length],f=a[0]*b[1]-b[0]*a[1];A+=f;cx+=(a[0]+b[0])*f;cy+=(a[1]+b[1])*f}A/=2;return A?[cx/(6*A),cy/(6*A)]:p[0]}
+function clipHalf(poly,keep){const out=[];for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length],fa=keep(a),fb=keep(b);
+  if(fa>=0)out.push(a);if((fa>=0)!==(fb>=0)){const t=fa/(fa-fb);out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t])}}return out}
+function clipConvex(poly,clip){let p=poly;for(let i=0;i<clip.length&&p.length;i++){const a=clip[i],b=clip[(i+1)%clip.length];p=clipHalf(p,q=>(b[0]-a[0])*(q[1]-a[1])-(b[1]-a[1])*(q[0]-a[0]))}return p}
+const inTer=p=>clipConvex(p,TER);
+function band(A,B,yb,yt){return inTer([[A(yb),yb],[B(yb),yb],[B(yt),yt],[A(yt),yt]])}
+const dist=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1]);
+
+// ---------- controles ----------
+const $=id=>document.getElementById(id);
+const st={n:1,streets:[{x:66.229,a:0}]};
+function ctl(parent,id,label,min,max,step,val,unit,note){
+  const d=document.createElement('div');d.className='ctl';d.id='c_'+id;
+  d.innerHTML=`<label for="${id}">${label}${note?` <small>${note}</small>`:''}</label><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"><input type="number" id="${id}_n" min="${min}" max="${max}" step="${step}" value="${val}" aria-label="${label} (${unit})">`;
+  parent.appendChild(d);
+  const r=d.querySelector('input[type=range]'), n=d.querySelector('input[type=number]');
+  r.addEventListener('input',()=>{n.value=r.value;upd()});
+  n.addEventListener('input',()=>{if(n.value!==''&&!isNaN(+n.value)){r.value=n.value;upd()}});
+  return {get v(){const x=+n.value;return isNaN(x)?+r.value:x}, set v(x){r.value=x;n.value=x}, el:d};
+}
+const M={}, mc=$('mainCtl');
+M.lotes=ctl(mc,'lotes','Número de lotes',2,120,1,BASE.lotes,'lotes','habitacionales');
+M.frente=ctl(mc,'frente','Frente de lote (m)',10,40,0.1,BASE.frente,'m');
+M.despl=ctl(mc,'despl','Mover conjunto (m)',0,80,0.5,BASE.despl,'m','arriba del eje 14');
+M.jardin=ctl(mc,'jardin','Jardín central: fondo (m)',0,60,0.5,BASE.jardin,'m');
+M.corredor=ctl(mc,'corredor','Corredor verde perimetral (m)',0,15,0.5,BASE.corredor,'m');
+M.camellon=ctl(mc,'camellon','Camellón central de calle (m)',0,12,0.5,BASE.camellon,'m','sobre el eje');
+M.espalda=ctl(mc,'espalda','Corredor entre lotes (m)',0,15,0.5,BASE.espalda,'m','con 2 o 3 calles');
+function setN(n){st.n=n;st.streets=DEF[n].map(x=>({x,a:0}));buildStreetCtl();upd()}
+function buildStreetCtl(){
+  const box=$('streetCtl');box.innerHTML='';
+  st.streets.forEach((s,i)=>{
+    const d=document.createElement('div');d.className='street';d.innerHTML=`<b>Calle ${i+1}</b>`;box.appendChild(d);
+    const cx=ctl(d,'sx'+i,'Eje sobre el eje 14 (m)',22,111,0.1,s.x,'m');
+    const ca=ctl(d,'sa'+i,'Inclinación (°)',-25,25,0.5,s.a,'grados');
+    s.cx=cx;s.ca=ca;
+  });
+  document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.n===st.n?'true':'false'));
+}
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>setN(+b.dataset.n)));
+['t_ejes','t_areas','t_cotas','p_hab','p_com','c_ter','c_inv'].forEach(id=>$(id).addEventListener('input',upd));
+$('reset').addEventListener('click',()=>{for(const k in BASE)M[k].v=BASE[k];setN(1)});
+
+// ---------- calculo ----------
+function calc(){
+  st.streets.forEach(s=>{if(s.cx){s.x=s.cx.v;s.a=s.ca.v}});
+  const N=Math.max(1,Math.round(M.lotes.v)), frente=Math.max(1,M.frente.v), despl=M.despl.v, jardin=M.jardin.v,
+        cor=M.corredor.v, cam=M.camellon.v, cc=st.n>1?M.espalda.v:0;
+  M.espalda.el.classList.toggle('dis',st.n<2);
+  const av=[], W=2*BANQ+ARROYO+cam;
+  const S=st.streets.map((s,i)=>{const t=Math.tan(s.a*Math.PI/180),c=Math.cos(s.a*Math.PI/180);
+    const cen=y=>s.x+t*(y-Y14);
+    return {i,s,c,cen,L:y=>cen(y)-W/2/c,R:y=>cen(y)+W/2/c,off:d=>(y=>cen(y)+d/c)}}).sort((a,b)=>a.s.x-b.s.x);
+  const bW=y=>xW(y)+cor, bE=y=>xE(y)-cor;
+  // medias franjas (cada una da frente a una calle)
+  const halves=[], espaldaF=[];
+  const bounds=[bW]; S.forEach(s=>bounds.push(s.L,s.R)); bounds.push(bE);
+  for(let k=0;k<bounds.length;k+=2){
+    const A=bounds[k],B=bounds[k+1];
+    const ext=(k===0||k===bounds.length-2);
+    if(ext){halves.push({A,B,face:k===0?S[0]:S[S.length-1]})}
+    else{const mid=y=>(A(y)+B(y))/2;const m1=y=>mid(y)-cc/2,m2=y=>mid(y)+cc/2;
+      halves.push({A,B:m1,face:S[k/2-1]});halves.push({A:m2,B,face:S[k/2]});espaldaF.push([m1,m2]);}
+  }
+  // filas segun numero de lotes
+  const H=halves.length, nf=Math.ceil(N/H), sobra=nf*H-N;
+  const yStart=Y14+despl;
+  const yEje3=lerpY(NW,NE,EJE23), yCentro=(yEje3+Y14)/2;
+  let hay=jardin>0.01, nAb=nf;
+  if(hay)nAb=Math.max(0,Math.min(nf,Math.round((yCentro-jardin/2-yStart)/frente)));
+  const rows=[];let y=yStart;
+  for(let k=0;k<nAb;k++){rows.push([y,y+frente]);y+=frente}
+  const g0=y,g1=hay?y+jardin:y; hay=hay&&nAb<nf; if(hay)y=g1;
+  for(let k=rows.length;k<nf;k++){rows.push([y,y+frente]);y+=frente}
+  const yTop=y;
+  if(yTop>Math.min(NW[1],NE[1])-2)av.push('No caben esos lotes: baja el número de lotes, el frente o el jardín');
+  // validar franjas
+  halves.forEach(h=>{if(h.B(Y14)-h.A(Y14)<3||h.B(yTop)-h.A(yTop)<3)av.push('Una franja de lotes quedó sin fondo: separa las calles o reduce corredores')});
+  for(let k=0;k+1<S.length;k++)if(S[k+1].L(Y14)<S[k].R(Y14)+1||S[k+1].L(yTop)<S[k].R(yTop)+1)av.push(`Las calles ${S[k].i+1} y ${S[k+1].i+1} se tocan o se cruzan`);
+  // lotes (oeste a este, de arriba hacia abajo); los lugares sobrantes de la fila de arriba (lado oriente) pasan a área verde
+  const lotes=[], extra=[];let num=0;
+  const topRow=rows.reduce((m,r)=>r[0]>m[0]?r:m,rows[0]);
+  halves.forEach((h,hi)=>{[...rows].sort((a,b)=>b[0]-a[0]).forEach(r=>{
+    const p=band(h.A,h.B,r[0],r[1]);const a=area(p);if(a<=1)return;
+    if(r===topRow&&hi>=H-sobra){extra.push(p);return}
+    num++;const fr=frente/h.face.c, fondo=a/fr;
+    lotes.push({n:num,p,a,fr,fondo,ok:a>=LMIN&&a<=LMAX})})});
+  if(lotes.length<N)av.push(`Solo caben ${lotes.length} lotes de ${N}`);
+  const out=x=>x.filter(p=>area(p)>0.01);
+  const jardinP=hay?out(halves.map(h=>band(h.A,h.B,g0,g1))):[];
+  const arranqueP=despl>0.01?out(halves.map(h=>band(h.A,h.B,Y14,yStart))):[];
+  const verdeTop=clipHalf(TER,q=>q[1]-yTop);
+  const corrs=[];if(cor>0.01){corrs.push(band(xW,bW,Y14,yTop));corrs.push(band(bE,xE,Y14,yTop))}
+  espaldaF.forEach(([m1,m2])=>{if(cc>0.01)corrs.push(band(m1,m2,Y14,yTop))});
+  const calleP=S.map(s=>({s,p:band(s.L,s.R,Y14,yTop),
+    a1:band(s.off(-cam/2-ARROYO/2),s.off(-cam/2),Y14,yTop), a2:band(s.off(cam/2),s.off(cam/2+ARROYO/2),Y14,yTop),
+    cam:cam>0.01?band(s.off(-cam/2),s.off(cam/2),Y14,yTop):null}));
+  const accesoP=inTer([[xW(Y14),Y14],[xE(Y14),Y14],SE,SW]);
+  const sum=a=>a.reduce((t,p)=>t+area(p),0);
+  const camA=sum(calleP.filter(c=>c.cam).map(c=>c.cam));
+  const A={hab:lotes.reduce((t,l)=>t+l.a,0), com:area(COM_W)+area(COM_E), vial:sum(calleP.map(c=>c.p))-camA,
+    acc:area(accesoP)-area(COM_W)-area(COM_E), verde:area(verdeTop)+sum(extra), jard:sum(jardinP), corr:sum(corrs),
+    cam:camA, arr:sum(arranqueP), neto:area(TER), ddv:area(DDV)};
+  const fuera=lotes.filter(l=>!l.ok);
+  if(fuera.length)av.push(`${fuera.length} lote(s) fuera del rango 600–990 m²: ${fuera.map(l=>l.n).join(', ')}`);
+  return {N,frente,cam,S,calleP,halves,corrs,rows,g0,g1,hay,yStart,yTop,lotes,extra,jardinP,arranqueP,verdeTop,accesoP,A,av};
+}
+
+// ---------- dibujo ----------
+const G=$('g'), NS='http://www.w3.org/2000/svg';
+const P=p=>p.map(q=>q[0].toFixed(3)+','+(-q[1]).toFixed(3)).join(' ');
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);(parent||G).appendChild(e);return e}
+function poly(p,fill,stroke,w,extra){if(!p||p.length<3)return;return el('polygon',Object.assign({points:P(p),fill,stroke:stroke||'none','stroke-width':w||0},extra||{}))}
+function line(a,b,stroke,w,dash){return el('line',{x1:a[0],y1:-a[1],x2:b[0],y2:-b[1],stroke,'stroke-width':w,'stroke-dasharray':dash||'none'})}
+function text(x,y,s,size,attrs){const t=el('text',Object.assign({x,y:-y,'font-size':size,'text-anchor':'middle','dominant-baseline':'middle','font-family':'IBM Plex Sans Condensed, Arial Narrow, sans-serif',fill:'var(--ink)'},attrs||{}));t.textContent=s;return t}
+function extLine(a,b,x0,x1){const f=x=>a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0]);return [[x0,f(x0)],[x1,f(x1)]]}
+function cota(a,b,off,label){ // cota alineada, desplazada hacia afuera (poligono CCW => normal derecha)
+  const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy),nx=dy/L,ny=-dx/L;
+  const A=[a[0]+nx*off,a[1]+ny*off],B=[b[0]+nx*off,b[1]+ny*off];
+  line([a[0]+nx*1,a[1]+ny*1],[a[0]+nx*(off+1.2),a[1]+ny*(off+1.2)],'var(--dim)',0.15);
+  line([b[0]+nx*1,b[1]+ny*1],[b[0]+nx*(off+1.2),b[1]+ny*(off+1.2)],'var(--dim)',0.15);
+  line(A,B,'var(--dim)',0.2);
+  [A,B].forEach(q=>line([q[0]-0.9*(dx/L)-0.9*nx,q[1]-0.9*(dy/L)-0.9*ny],[q[0]+0.9*(dx/L)+0.9*nx,q[1]+0.9*(dy/L)+0.9*ny],'var(--dim)',0.3));
+  let ang=-Math.atan2(dy,dx)*180/Math.PI; if(ang>90)ang-=180; if(ang<-90)ang+=180;
+  const m=[(A[0]+B[0])/2+nx*1.8,(A[1]+B[1])/2+ny*1.8];
+  const t=text(m[0],m[1],label||fmt(L)+' m',2.3,{fill:'var(--dim)','font-family':'IBM Plex Mono, monospace'});t.setAttribute('transform',`rotate(${ang} ${m[0]} ${-m[1]})`);
+}
+function draw(r){
+  G.innerHTML='';
+  const ejes=$('t_ejes').checked, areas=$('t_areas').checked, cotas=$('t_cotas').checked;
+  const g='var(--grid)', DS='2.5 1.2 0.6 1.2';
+  // ejes fijos sin numero: 18, 17, 14, 3, 1 y 2
+  [extLine(DDV[3],DDV[2],-10,134),extLine(SW,SE,-10,134),[[-10,Y14],[134,Y14]],extLine(NW,NE,-10,134)].forEach(l=>line(l[0],l[1],g,0.22,DS));
+  line([11.23,-152],[11.23,164],g,0.22,DS); line([122.4,-152],[118.05,164],g,0.22,DS);
+  // derecho de via: gris con hatch tenue
+  poly(DDV,'var(--access)','none'); poly(DDV,'url(#hatch)','var(--ddv)',0.25,{'stroke-dasharray':'1.4 1.1'});
+  text(66,-135.6,'DERECHO DE VÍA',2.2,{fill:'var(--muted)','letter-spacing':'0.6'});
+  // acceso fijo y comerciales
+  poly(r.accesoP,'var(--access)','none');
+  poly(COM_W,'var(--com)','var(--com-edge)',0.35);poly(COM_E,'var(--com)','var(--com-edge)',0.35);
+  const cw=centroid(COM_W),ce=centroid(COM_E);
+  text(cw[0]-4,cw[1]+3,'COMERCIAL A',2.8,{'font-weight':700});text(cw[0]-4,cw[1]-1,fmt(area(COM_W))+' m²',2.2,{fill:'var(--muted)'});
+  text(ce[0]+6,ce[1]+3,'COMERCIAL B',2.8,{'font-weight':700});text(ce[0]+6,ce[1]-1,fmt(area(COM_E))+' m²',2.2,{fill:'var(--muted)'});
+  text(66.2,-100.5,'ACCESO',2.3,{fill:'var(--muted)','letter-spacing':'0.6'});
+  // verdes
+  poly(r.verdeTop,'var(--green)','none'); r.extra.forEach(p=>poly(p,'var(--green)','none'));
+  const cv=centroid(r.verdeTop);text(cv[0],cv[1],'ÁREA VERDE · '+fmt(r.A.verde)+' m²',3,{'font-weight':600});
+  r.jardinP.forEach(p=>poly(p,'var(--green)','none'));
+  if(r.jardinP.length){const c=centroid(r.jardinP[0]);text(c[0],c[1],'JARDÍN',2.6,{'font-weight':600})}
+  r.arranqueP.forEach(p=>poly(p,'var(--green3)','none'));
+  r.corrs.forEach(p=>poly(p,'var(--green2)','none'));
+  // calles
+  r.calleP.forEach(c=>{poly(c.p,'var(--walk)','none');poly(c.a1,'var(--street)','none');poly(c.a2,'var(--street)','none');
+    if(c.cam)poly(c.cam,'var(--median)','none');
+    const s=c.s, a=[s.cen(Y14),Y14], b=[s.cen(r.yTop),r.yTop];
+    if(!c.cam)line(a,b,'var(--axisline)',0.3,'3 1.5');
+    const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+    const t=text(m[0]+(c.cam?0:2.4),m[1],'CALLE '+(s.i+1),2.3,{fill:'var(--muted)','letter-spacing':'0.5'});t.setAttribute('transform',`rotate(${-90+s.s.a} ${m[0]+(c.cam?0:2.4)} ${-m[1]})`);
+    const h=el('circle',{cx:a[0],cy:-a[1],r:2.4,fill:'var(--accent)',stroke:'var(--panel)','stroke-width':0.6,'data-i':s.i,style:'cursor:ew-resize'});h.classList.add('handle');
+  });
+  // ejes de lotes amarrados a las filas, de lado a lado, sin numero
+  if(ejes){const ys=new Set();r.rows.forEach(([a,b])=>{ys.add(a.toFixed(3));ys.add(b.toFixed(3))});
+    [...ys].map(Number).filter(v=>Math.abs(v-Y14)>0.01).forEach(v=>line([-10,v],[134,v],g,0.14,'1 1'))}
+  // lotes
+  r.lotes.forEach(l=>{poly(l.p,'var(--lot)',l.ok?'var(--lot-edge)':'var(--bad)',l.ok?0.25:0.6);
+    const c=centroid(l.p);text(c[0],c[1]+(areas?1.4:0),String(l.n),3.2,{'font-weight':700,fill:l.ok?'var(--ink)':'var(--bad)'});
+    if(areas)text(c[0],c[1]-2.2,fmt(l.a)+' m²',2.1,{fill:'var(--muted)'});});
+  // terreno
+  poly(TER,'none','var(--ink)',0.5);
+  if(cotas){cota(SW,NW,-7);cota(NW,NE,-6);cota(NE,SE,-7);cota(DDV[3],DDV[2],5.5);cota(SW,DDV[3],7,fmt(dist(SW,DDV[3]))+' m');cota(SE,DDV[2],-7,fmt(dist(SE,DDV[2]))+' m');}
+}
+const fmt=v=>v.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+const mon=v=>'$'+Math.round(v).toLocaleString('es-MX');
+const pct=(v,t)=>(100*v/t).toFixed(1)+' %';
+
+// ---------- tablas ----------
+let csv='';
+function tables(r){
+  const A=r.A, neto=A.neto, vend=A.hab+A.com, circ=A.vial+A.acc, ver=A.verde+A.jard+A.corr+A.cam+A.arr, suma=vend+circ+ver;
+  const rows=[['h','ÁREA VENDIBLE'],['r',`Lotes habitacionales (${r.lotes.length})`,A.hab,'var'],['r','Comerciales A y B',A.com,'fijo'],['s','Subtotal vendible',vend],
+    ['h','ÁREA DE CIRCULACIÓN'],['r',`Vialidades (${r.S.length} calle${r.S.length>1?'s':''})`,A.vial,'var'],['r','Acceso y circulación (eje 14 a 17)',A.acc,'fijo'],['s','Subtotal circulación',circ],
+    ['h','ÁREA VERDE Y COMÚN'],['r','Área verde atrás',A.verde,'var'],['r','Jardín central',A.jard,'var'],['r','Corredores verdes',A.corr,'var'],['r','Camellones',A.cam,'var'],['r','Área común de arranque',A.arr,'var'],['s','Subtotal verde y común',ver],
+    ['t','Terreno neto',suma],['r','Derecho de vía (eje 17 a 18)',A.ddv,'fijo'],['t','Terreno según escritura',suma+A.ddv]];
+  csv='CUADRO DE AREAS\nConcepto\tm2\t% del neto\n';
+  $('tabla').innerHTML=rows.filter(x=>!(x[0]==='r'&&x[3]==='var'&&x[2]<0.005&&/Camell|arranque|Corredores/.test(x[1]))).map(x=>{
+    if(x[0]==='h')return `<tr><th colspan="3">${x[1]}</th></tr>`;
+    const cls=x[0]==='s'?'sub':x[0]==='t'?'tot':'';const tag=x[3]?`<span class="tag ${x[3]}">${x[3]==='var'?'cambia':'fijo'}</span>`:'';
+    const noP=/escritura|Derecho/.test(x[1]);
+    csv+=`${x[1]}\t${x[2].toFixed(2)}\t${noP?'':(100*x[2]/neto).toFixed(1)}\n`;
+    return `<tr class="${cls}"><td>${x[1]}${tag}</td><td class="n">${fmt(x[2])}</td><td class="n">${noP?'':pct(x[2],neto)}</td></tr>`}).join('');
+  const as=r.lotes.map(l=>l.a), ok=r.lotes.filter(l=>l.ok).length;
+  $('chips').innerHTML=`<span class="chip">${r.lotes.length} lotes + 2 comerciales</span>`+(as.length?`<span class="chip">${fmt(Math.min(...as))} a ${fmt(Math.max(...as))} m²</span>`:'')+
+    `<span class="chip ${ok===r.lotes.length?'ok':'warn'}">${ok} de ${r.lotes.length} en 600–990 m²</span>`+`<span class="chip ${Math.abs(suma-neto)<0.5?'ok':'bad'}">Control ${fmt(suma-neto)} m²</span>`;
+  $('avisos').innerHTML=r.av.map(a=>`<li>${a}</li>`).join('');
+  // negocio
+  const ph=+$('p_hab').value||0, pc=+$('p_com').value||0, ct=+$('c_ter').value||0, ci=+$('c_inv').value||0;
+  const vh=A.hab*ph, vc=A.com*pc, vt=vh+vc, ut=vt-ct-ci;
+  $('kpi').innerHTML=[['Venta lotes habitacionales',mon(vh)],['Venta comerciales',mon(vc)],['Venta total',mon(vt),'big'],['Terreno en breña','−'+mon(ct)],['Inversión','−'+mon(ci)],['Utilidad',mon(ut),'big'],
+    ['Margen sobre venta',vt?(100*ut/vt).toFixed(1)+' %':'—'],['Costo por m² vendible',vend?mon((ct+ci)/vend):'—'],['Precio promedio por lote',r.lotes.length?mon(vh/r.lotes.length):'—']]
+    .map(([k,v,c])=>`<span class="${c||''}">${k}</span><span class="v ${c||''}">${v}</span>`).join('');
+  // tabla de lotes
+  let h=`<tr><th>Lote</th><th class="n">Frente</th><th class="n">Fondo</th><th class="n">m²</th><th class="n">Precio</th></tr>`;
+  csv+='\nTABLA DE LOTES\nLote\tFrente m\tFondo m\tm2\tPrecio\n';
+  r.lotes.forEach(l=>{h+=`<tr class="${l.ok?'':'bad'}"><td>${l.n}</td><td class="n">${l.fr.toFixed(2)}</td><td class="n">${l.fondo.toFixed(2)}</td><td class="n">${fmt(l.a)}</td><td class="n">${mon(l.a*ph)}</td></tr>`;
+    csv+=`${l.n}\t${l.fr.toFixed(2)}\t${l.fondo.toFixed(2)}\t${l.a.toFixed(2)}\t${Math.round(l.a*ph)}\n`});
+  [['Comercial A',area(COM_W)],['Comercial B',area(COM_E)]].forEach(([n,a])=>{h+=`<tr class="fix"><td>${n} <span class="tag fijo">fijo</span></td><td class="n">—</td><td class="n">—</td><td class="n">${fmt(a)}</td><td class="n">${mon(a*pc)}</td></tr>`;csv+=`${n}\t\t\t${a.toFixed(2)}\t${Math.round(a*pc)}\n`});
+  h+=`<tr class="tot"><td>Total</td><td></td><td></td><td class="n">${fmt(vend)}</td><td class="n">${mon(vt)}</td></tr>`;
+  $('tlotes').innerHTML=h;
+}
+
+function upd(){const r=calc();draw(r);tables(r)}
+
+// arrastre de calles sobre el eje 14
+const svg=$('plan');let drag=null;
+svg.addEventListener('pointerdown',e=>{const t=e.target;if(t.classList&&t.classList.contains('handle')){drag=+t.getAttribute('data-i');svg.setPointerCapture(e.pointerId);e.preventDefault()}});
+svg.addEventListener('pointermove',e=>{if(drag===null)return;const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+  st.streets[drag].cx.v=Math.max(22,Math.min(111,Math.round(q.x*10)/10));upd()});
+['pointerup','pointercancel'].forEach(ev=>svg.addEventListener(ev,()=>{drag=null}));
+$('copiar').addEventListener('click',()=>{try{navigator.clipboard.writeText(csv).then(()=>{$('copiado').textContent='Copiadas, pégalas en Excel'},()=>{$('copiado').textContent='No se pudo copiar'})}catch(e){$('copiado').textContent='No se pudo copiar'}});
+
+buildStreetCtl();upd();
+})();
+</script>
+
+</body></html>
